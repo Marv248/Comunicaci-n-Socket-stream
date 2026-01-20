@@ -1,5 +1,6 @@
 package org.marco.chat.servidor;
 
+import org.marco.chat.modelo.Usuario;
 import org.marco.chat.utilidades.FechaUtil;
 
 import java.io.BufferedReader;
@@ -19,18 +20,25 @@ public class ClienteHilo extends Thread{
     @Override
     public void run() {
         try (
-            BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter pw = new PrintWriter(socket.getOutputStream(), true);
-        ){
-            String mensaje;
-            while((mensaje = br.readLine()) != null){ //Asigna el texto del mensaje a "mensaje"
-                String registro = "[" + FechaUtil.getFechaActual() +"] " + mensaje;
-                pw.println(registro); // Se imprime también en la consola
-                historialServidor.agregarMensaje(registro); // Se guardan todos los datos del mensaje en el servidor
+                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter pw = new PrintWriter(socket.getOutputStream(), true);
+        ) {
+            String ipEmisor = socket.getInetAddress().getHostAddress();
+            int puertoEmisor = socket.getPort();
 
+            String nombreUsuario = br.readLine(); // La primer linea que ingrese el usuario
+            Usuario emisor = new Usuario(nombreUsuario + puertoEmisor, ipEmisor, puertoEmisor);
+
+            String contenido;
+            while ((contenido = br.readLine()) != null) {
+                String registro = "[" + FechaUtil.getFechaActual() + "] " + emisor.getNombre() + ": " + contenido;
+                pw.println("Servidor recibió: " + contenido);
+                historialServidor.agregarMensaje(registro);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Cliente desconectado: " + e.getMessage());
+        } finally {
+            try { socket.close(); } catch (Exception ex) {}
         }
     }
 }
