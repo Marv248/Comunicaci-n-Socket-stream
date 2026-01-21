@@ -26,7 +26,7 @@ public class ClienteHilo extends Thread{
             String ipEmisor = socket.getInetAddress().getHostAddress();
             int puertoEmisor = socket.getPort();
 
-            String nombreUsuario = br.readLine(); // La primer linea que ingrese el usuario
+            String nombreUsuario = br.readLine(); // La primer linea que ingrese será el usuario
             Usuario emisor = new Usuario(nombreUsuario + puertoEmisor, ipEmisor, puertoEmisor);
 
             String contenido;

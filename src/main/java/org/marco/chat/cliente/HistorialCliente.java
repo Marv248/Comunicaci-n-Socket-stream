@@ -1,5 +1,7 @@
 package org.marco.chat.cliente;
 
+import org.marco.chat.modelo.Mensaje;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -13,20 +15,21 @@ public class HistorialCliente {
     public void agregarMensaje(String mensaje){
         mensajes.add(mensaje);
     }
+
     public void gerDoc() {
-        // 1. Obtener la ruta de la carpeta de Descargas del usuario actual
+        // CREA RUTA PARA LAS DESCARGAS
         String rutaDescargas = System.getProperty("user.home") + File.separator + "Downloads";
-        // 2. Definir la nueva carpeta y el archivo
+        // UBICACIÓN Y NOMBRE DEL ARCHIVO
         File nuevaCarpeta = new File(rutaDescargas, "ConversacionesGuardadas");
         File archivo = new File(nuevaCarpeta, "conversacion.txt");
         try {
-            // 3. Crear la carpeta si no existe
+            // CREAR CARPETA
             if (!nuevaCarpeta.exists()) {
                 if (nuevaCarpeta.mkdirs()) {
                     System.out.println("Carpeta creada con éxito.");
                 }
             }
-            // 4. Escribir el archivo dentro de la carpeta creada
+            // AGREGAR MENSAJES AL ARCHIVO
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo))) {
                 for (int i = 0; i < mensajes.size(); i++) {
                     bw.write(mensajes.get(i));
@@ -38,5 +41,11 @@ public class HistorialCliente {
             System.err.println("Error al manejar el archivo: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    //TODO @CRISTO HAZ QUE LEA LOS DOCS Y QUE CARGUE EN EL ARRAYLIST LOS MENSAJES
+    public List<String> cargar(){
+        ArrayList<String> mensajes = new ArrayList<>();
+        return mensajes;
     }
 }

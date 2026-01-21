@@ -1,9 +1,23 @@
 package org.marco.chat.servidor;
 
+import javax.swing.*;
+
 public class Servidor {
     public static void main(String[] args) {
-        // TODO: Agregar lógica Swing para preguntar el puerto donde va a recibir
-        int puerto = 5000; // Cambiar al que seleccione el usuario en J Swing
+        SwingUtilities.invokeLater(() -> {
+            String input = JOptionPane.showInputDialog(null, "Ingrese el puerto del servidor:",  "Servidor de Chat", JOptionPane.QUESTION_MESSAGE);
 
+            if (input == null) {
+                System.exit(0);
+            }
+
+            int puerto = Integer.parseInt(input);
+
+            HistorialServidor historialServidor = new HistorialServidor();
+
+            ServidorSocket servidor = new ServidorSocket(puerto, historialServidor);
+            // El servidor corre en otro hilo
+            new Thread(servidor::iniciar).start();
+        });
     }
 }
