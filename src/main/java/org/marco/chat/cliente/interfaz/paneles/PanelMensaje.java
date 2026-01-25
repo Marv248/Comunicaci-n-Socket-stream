@@ -14,7 +14,9 @@ public class PanelMensaje extends JPanel {
             if(txtMensaje.getText().equals("")){
                 JOptionPane.showMessageDialog(null, "Debe ingresar texto", "Llene el mensaje", JOptionPane.WARNING_MESSAGE);
             }
-//            ControladorChat.enviarMensaje(txtMensaje.getText()); TODO: IMPLEMENTAR MÉTODO enviarMensaje()
+            ControladorChat controladorChat = new ControladorChat();
+            controladorChat.enviarMensaje(txtMensaje.getText());
+            chat.mostrarMensaje(txtMensaje.getText());
             txtMensaje.setText("");
         });
 

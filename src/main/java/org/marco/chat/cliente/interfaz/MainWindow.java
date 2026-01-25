@@ -2,6 +2,7 @@ package org.marco.chat.cliente.interfaz;
 
 import org.marco.chat.cliente.interfaz.paneles.PanelChat;
 import org.marco.chat.cliente.interfaz.paneles.PanelConexion;
+import org.marco.chat.modelo.Usuario;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,11 +10,17 @@ import java.awt.*;
 public class MainWindow extends JFrame {
     private CardLayout cardLayout;
     private JPanel contenedor;
+    private PanelChat panelChat;
+    private PanelConexion panelConexion;
 
     public MainWindow() {
         cardLayout = new CardLayout();
         contenedor = new JPanel(cardLayout);
+        panelConexion = new PanelConexion(this);
+        panelChat = new PanelChat(this);
 
+        contenedor.add(panelConexion, "Conexion");
+        contenedor.add(panelChat, "Chat");
         contenedor.add(new PanelConexion(this), "Conexion");
         contenedor.add(new PanelChat(this), "Chat");
 
@@ -26,7 +33,9 @@ public class MainWindow extends JFrame {
         setVisible(true);
     }
 
-    public void mostrarChat(){
+    public void mostrarChat(Usuario usuario) {
+        panelChat.setUsuario(usuario);
         cardLayout.show(contenedor, "Chat");
     }
+
 }

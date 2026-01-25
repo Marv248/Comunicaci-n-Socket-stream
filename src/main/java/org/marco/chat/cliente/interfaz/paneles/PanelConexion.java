@@ -2,6 +2,7 @@ package org.marco.chat.cliente.interfaz.paneles;
 
 import org.marco.chat.cliente.interfaz.MainWindow;
 import org.marco.chat.cliente.interfaz.controladores.ControladorConexion;
+import org.marco.chat.modelo.Usuario;
 
 import javax.swing.*;
 
@@ -17,20 +18,28 @@ public class PanelConexion extends JPanel {
         JButton btnConectar = new JButton("Conectar");
 
         btnConectar.addActionListener(e -> {
-            if (!txtIp.getText().isEmpty() & !txtPuerto.getText().isEmpty() & !txtNombre.getText().isEmpty())
+            Usuario usuario;
+            if (txtIp.getText().equals("") || txtPuerto.getText().equals("") || txtNombre.getText().equals("")) {
                 JOptionPane.showMessageDialog(null, "Por favor, ingrese el IP del servidor", "Ingrese todos los valores", JOptionPane.WARNING_MESSAGE);
+                return;
+            } else {
+                usuario = new Usuario(txtNombre.getText(), txtIp.getText(), Integer.parseInt(txtPuerto.getText()));
+                JOptionPane.showMessageDialog(ventana, "Inicio exitoso", "Inicio exitoso", JOptionPane.INFORMATION_MESSAGE);
+            }
 
-            ControladorConexion.conectar(txtIp.getText(), Integer.parseInt(txtPuerto.getText()), txtNombre.getText()); // Pasa al controlador (intermediario) la IP; puerto y nombre del usuario
-            ventana.mostrarChat(); // Cambiar panel de conexion a chat
+            if (ControladorConexion.conectar(txtIp.getText(), Integer.parseInt(txtPuerto.getText()), txtNombre.getText())) // Pasa al controlador (intermediario) la IP; puerto y nombre del usuario
+                ventana.mostrarChat(usuario); // Cambiar panel de conexion a chat
+            else
+                JOptionPane.showMessageDialog(null, "Algo salió mal al conectarse al servidor", "No se pudo conectar al servidor", JOptionPane.WARNING_MESSAGE);
         });
 
-        add(new JLabel("IP"));
+        add(new JLabel("IP del servidor:"));
         add(txtIp);
 
-        add(new JLabel("Puerto"));
+        add(new JLabel("Puerto del servidor:"));
         add(txtPuerto);
 
-        add(new JLabel("Usuario"));
+        add(new JLabel("Usuario:"));
         add(txtNombre);
 
         add(btnConectar);

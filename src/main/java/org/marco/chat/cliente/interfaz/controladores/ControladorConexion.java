@@ -16,7 +16,7 @@ public class ControladorConexion  {
         // Evita instanciación
     }
 
-    public static void conectar(String ip, int puerto, String nombreUsuario) {
+    public static boolean conectar(String ip, int puerto, String nombreUsuario) {
         try {
             socket = new Socket(ip, puerto);
 
@@ -30,6 +30,7 @@ public class ControladorConexion  {
             receptor.start();
 
             System.out.println("Conectado al servidor " + ip + ":" + puerto);
+            return true;
 
         } catch (Exception e) {
 
@@ -41,6 +42,7 @@ public class ControladorConexion  {
                     "Error de conexión",
                     JOptionPane.ERROR_MESSAGE
             );
+            return false;
         }
     }
 

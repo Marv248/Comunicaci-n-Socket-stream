@@ -13,7 +13,7 @@ public class Servidor {
 
             int puerto = Integer.parseInt(input);
 
-            HistorialServidor historialServidor = new HistorialServidor();
+            HistorialServidor historialServidor = new HistorialServidor(); // TODO: CARGAR AL HISTORIAL ACTUAL ACUMULADO EN DOCS
 
             ServidorSocket servidor = new ServidorSocket(puerto, historialServidor);
             // El servidor corre en otro hilo
