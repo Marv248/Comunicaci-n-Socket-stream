@@ -1,41 +1,65 @@
 package org.marco.chat.cliente.interfaz;
 
+import org.marco.chat.cliente.interfaz.controladores.ControladorConexion;
 import org.marco.chat.cliente.interfaz.paneles.PanelChat;
 import org.marco.chat.cliente.interfaz.paneles.PanelConexion;
+import org.marco.chat.utilidades.PanelDegradado;
 import org.marco.chat.modelo.Usuario;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class MainWindow extends JFrame {
-    private CardLayout cardLayout;
-    private JPanel contenedor;
-    private PanelChat panelChat;
-    private PanelConexion panelConexion;
+    private CardLayout cards;
+    private PanelDegradado fondo;
+    private PanelChat pChat;
+    private PanelConexion pCon;
 
     public MainWindow() {
-        cardLayout = new CardLayout();
-        contenedor = new JPanel(cardLayout);
-        panelConexion = new PanelConexion(this);
-        panelChat = new PanelChat(this);
-
-        contenedor.add(panelConexion, "Conexion");
-        contenedor.add(panelChat, "Chat");
-        contenedor.add(new PanelConexion(this), "Conexion");
-        contenedor.add(new PanelChat(this), "Chat");
-
-        add(contenedor);
-        cardLayout.show(contenedor, "conexion");
-
         setTitle("Chat Rebollo - Nicolás");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(1000, 700);
+        setLocationRelativeTo(null);
+        // pa que no se cierre solo, primero preguntamos
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        // evento pa cuando le pican a la X de la ventana
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                confirmarSalida();
+            }
+        });
+        cards = new CardLayout();
+        fondo = new PanelDegradado();
+        fondo.setLayout(cards);
+        pChat = new PanelChat(this);
+        pCon = new PanelConexion(this);
+        // agregamos las pantallas al contenedor
+        fondo.add(pCon, "Conexion");
+        fondo.add(pChat, "Chat");
+        add(fondo);
+        cards.show(fondo, "Conexion"); // que empiece en el login
         setVisible(true);
     }
 
-    public void mostrarChat(Usuario usuario) {
-        panelChat.setUsuario(usuario);
-        cardLayout.show(contenedor, "Chat");
+    // metodo pa cambiar a la pantalla del chat
+    public void mostrarChat(Usuario u) {
+        pChat.setUsuario(u);
+        cards.show(fondo, "Chat");
     }
 
+    public PanelChat getPanelChat() {
+        return pChat;
+    }
+
+    // mensaje de confirmacion pa salir
+    public void confirmarSalida() {
+        int v = JOptionPane.showConfirmDialog(this,
+                "¿Deseas salir del chat?", "Cerrar Sesión", JOptionPane.YES_NO_OPTION);
+        if (v == JOptionPane.YES_OPTION) {
+            ControladorConexion.cerrarConexion();
+            System.exit(0);
+        }
+    }
 }

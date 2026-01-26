@@ -1,28 +1,54 @@
 package org.marco.chat.servidor;
 
-import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServidorSocket {
-    private int port;
-    private HistorialServidor historialServidor; //todo: podríamos agregar por cada conversación un archivo con el nombre los usuarios. Ejemplo: User1_User2.txt
+    private int p;
+    private HistorialServidor hist;
 
-    public ServidorSocket(int port, HistorialServidor historialServidor) {
-        this.port = port;
-        this.historialServidor = historialServidor;
+    // aqui guardamos a todos los que entran: <Nombre, Salida>
+    public static Map<String, PrintWriter> clientesMapa = new ConcurrentHashMap<>();
+
+    public ServidorSocket(int p, HistorialServidor hist) {
+        this.p = p;
+        this.hist = hist;
     }
 
-    public void iniciar(){
-        System.out.println("Servidor Socket escuchando en puerto: " + port);
-        try {
-            ServerSocket serverSocket = new ServerSocket(port);
-            while (true){
-                Socket socket = serverSocket.accept(); // Espera escuchando hasta que alguien se conecte
-                new ClienteHilo(socket, historialServidor).start();
+    public void iniciar() {
+        System.out.println("Servidor prendido en el puerto: " + p);
+        try (ServerSocket ss = new ServerSocket(p)) {
+            while (true) {
+                // esperamos a que alguien se conecte
+                Socket s = ss.accept();
+                // creamos un hilo pa atender a cada cliente por separado
+                new ClienteHilo(s, hist).start();
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    // metodo pa avisar a todos quien esta conectado
+    public static void notificarActualizacionDeUsuarios() {
+        // pasamos por cada cliente pa mandarle la lista
+        for (String yo : clientesMapa.keySet()) {
+            StringBuilder sb = new StringBuilder();
+            // armamos la lista pero quitando el nombre del que la recibe
+            for (String user : clientesMapa.keySet()) {
+                if (!user.equals(yo)) {
+                    if (sb.length() > 0) sb.append(",");
+                    sb.append(user);
+                }
+            }
+            // mandamos el comando especial pa que el cliente actualice su panel
+            PrintWriter out = clientesMapa.get(yo);
+            if (out != null) {
+                out.println("LIST_UPDATE:" + sb.toString());
+            }
         }
     }
 }

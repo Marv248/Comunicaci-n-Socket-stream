@@ -1,64 +1,40 @@
 package org.marco.chat.cliente;
 
-import org.marco.chat.modelo.Mensaje;
 import org.marco.chat.utilidades.FechaUtil;
-
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class HistorialCliente {
-    private List<String > mensajes = new ArrayList<>();
-    private File archivo;
-    private int contador = 0;
-
-    public void agregarMensaje(String mensaje){
-        mensajes.add(FechaUtil.getFechaActual() + mensaje);
-        guardarEnArchivo(FechaUtil.getFechaActual() + " |" + mensaje);
-    }
+    private String ruta;
 
     public HistorialCliente() {
-        // CREA RUTA PARA LAS DESCARGAS
-        String rutaDescargas = System.getProperty("user.home") + File.separator + "Downloads";
-        // UBICACIÓN Y NOMBRE DEL ARCHIVO
-        File nuevaCarpeta = new File(rutaDescargas, "ConversacionesGuardadas");
-
-        if (!nuevaCarpeta.exists()) {
-            nuevaCarpeta.mkdir();
+        // lo guardamos en descargas pa encontrarlo rapido
+        String descargas = System.getProperty("user.home") + File.separator + "Downloads";
+        File carpeta = new File(descargas, "ConversacionesChat");
+        // si no existe la carpeta la creamos
+        if (!carpeta.exists()) {
+            carpeta.mkdir();
         }
-
-        archivo = new File(nuevaCarpeta, "conversacionesGuardadas" +  contador +".txt");
-        contador++;
+        this.ruta = carpeta.getAbsolutePath();
     }
 
-    //TODO @CRISTO HAZ QUE LEA LOS DOCS Y QUE CARGUE EN EL ARRAYLIST LOS MENSAJES
-    public List<String> cargar() {
-        mensajes.clear();
-        if (!archivo.exists()) {
-            return mensajes;
+    // metodo pa guardar los mensajes en un txt
+    public void guardarMensaje(String de, String para, String texto) {
+        String archivo;
+        // comparamos los nombres pa que el archivo siempre se llame igual
+        // sin importar quien mande el mensaje
+        if (de.compareTo(para) < 0) {
+            archivo = de + "-" + para + ".txt";
+        } else {
+            archivo = para + "-" + de + ".txt";
         }
-        try (BufferedReader br = new BufferedReader( new FileReader(archivo))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                mensajes.add(linea);
-            }
+        File f = new File(ruta, archivo);
+        // abrimos el archivo pa escribir al final sin borrar lo de antes
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(f, true))) {
+            String linea = "[" + FechaUtil.getFechaActual() + "] " + de + ": " + texto;
+            bw.write(linea);
+            bw.newLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return mensajes;
-    }
-
-    private void guardarEnArchivo(String mensaje) {
-
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo, true))) {
-            bw.write(mensaje);
-            bw.newLine(); // Salto de línea
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public List<String> getMensajes() {
-        return mensajes;
     }
 }

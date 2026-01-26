@@ -1,65 +1,71 @@
 package org.marco.chat.cliente.interfaz.controladores;
 
 import org.marco.chat.cliente.ClienteReceptor;
-
+import org.marco.chat.cliente.interfaz.paneles.PanelChat;
 import javax.swing.*;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
-public class ControladorConexion  {
+public class ControladorConexion {
 
-    private static Socket socket;
-    private static PrintWriter salida;
-    private static ClienteReceptor receptor;
+    // variables pa manejar la conexión del programa
+    private static Socket s;
+    private static PrintWriter out;
+    private static ClienteReceptor rec;
 
-    private ControladorConexion() {
-        // Evita instanciación
-    }
+    private ControladorConexion() {}
 
-    public static boolean conectar(String ip, int puerto, String nombreUsuario) {
+    public static boolean conectar(String ip, int p, String user, PanelChat panel) {
         try {
-            socket = new Socket(ip, puerto);
+            s = new Socket(ip, p);
+            out = new PrintWriter(s.getOutputStream(), true);
+            // pa leer la respuesta del server rápido
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            // mandamos el nombre para ver si nos deja entrar
+            out.println(user);
+            // leemos si el server dijo OK o dio error
+            String res = in.readLine();
+            if (res != null && res.equals("OK")) {
+                // si esta bien, prendemos el hilo que recibe mensajes
+                rec = new ClienteReceptor(s, panel);
+                rec.start();
+                System.out.println("Login exitoso: " + user);
+                return true;
+            } else {
+                // si el nombre ya estaba o algo pasó
+                String error = (res != null) ? res : "El nombre ya esta en uso";
+                JOptionPane.showMessageDialog(null, error, "Error de Usuario", JOptionPane.WARNING_MESSAGE);
 
-            salida = new PrintWriter(socket.getOutputStream(), true);
-
-            // IMPRIME COMO PRIMERa LÍNEA EL NOMBRE DEL USUARIO PARA EL SERVIDOR
-            salida.println(nombreUsuario);
-
-            // HILO DEL RECEPTOR
-            receptor = new ClienteReceptor(socket);
-            receptor.start();
-
-            System.out.println("Conectado al servidor " + ip + ":" + puerto);
-            return true;
+                // cerramos lo que se abrio
+                if (out != null) out.close();
+                if (s != null) s.close();
+                return false;
+            }
 
         } catch (Exception e) {
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "No se pudo conectar con el servidor.\n" +
-                            "Verifique que el servidor esté activo y los datos sean correctos.\n\n" +
-                            "Detalle: " + e.getMessage(),
-                    "Error de conexión",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(null, "No hay server: " + e.getMessage());
             return false;
         }
     }
 
-    public static void enviarMensaje(String mensaje) {
-        if (salida != null) {
-            salida.println(mensaje);
+    // metodo simple para mandar texto al server
+    public static void enviarMensaje(String m) {
+        if (out != null) {
+            out.println(m);
         }
     }
 
-    public static Socket getSocket() {
-        return socket;
-    }
-
+    // para cerrar cuando salimos
     public static void cerrarConexion() {
         try {
-            if (receptor != null) receptor.interrupt();
-            if (socket != null) socket.close();
-        } catch (Exception ignored) {}
+            if (out != null) out.close();
+            if (rec != null) rec.interrupt();
+            if (s != null) s.close();
+            System.out.println("Desconectado.");
+        } catch (Exception e) {
+            // error al cerrar
+        } finally {
+            System.exit(0);
+        }
     }
 }

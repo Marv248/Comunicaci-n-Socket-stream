@@ -18,15 +18,12 @@ public class Mensaje {
     public String getContenido() {
         return contenido;
     }
-
     public Usuario getEmisor() {
         return emisor;
     }
-
     public Usuario getReceptor() {
         return receptor;
     }
-
     public LocalDateTime getFecha() {
         return fecha;
     }
